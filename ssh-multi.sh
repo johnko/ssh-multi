@@ -2,7 +2,7 @@
 # ssh-multi
 # D.Kovalov
 # Based on http://linuxpixies.blogspot.jp/2011/06/tmux-copy-mode-and-how-to-control.html
-# Modified by johnko
+# Modified by johnko https://gist.github.com/johnko/a8481db6a83ec5ea2f37
 
 # a script to ssh multiple servers over multiple tmux panes
 
