@@ -6,6 +6,10 @@
 
 # a script to ssh multiple servers over multiple tmux panes
 
+######################################################################
+# Script version is yymmdd-HHMMSS in UTC, date -u +%y%m%d-%H%M%S
+######################################################################
+SCRIPTVERSION=150530-013518
 
 starttmux() {
     count=0
