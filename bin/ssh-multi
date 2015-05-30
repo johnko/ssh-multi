@@ -9,7 +9,9 @@
 ######################################################################
 # Script version is yymmdd-HHMMSS in UTC, date -u +%y%m%d-%H%M%S
 ######################################################################
-SCRIPTVERSION=150530-013518
+SCRIPTVERSION=150530-030846
+
+NEWSESSION=1 # set to 0 to reuse an existing tmux session
 
 starttmux() {
     count=0
@@ -23,8 +25,12 @@ starttmux() {
     for i in ${HOSTS} ; do
         count=$(( count + 1 ))
         if [ ${count} -eq 1 ]; then
-            if tmux ls >/dev/null 2>/dev/null ; then
-                tmux new-window "ssh ${i}"
+            if [ "x1" != "x${NEWSESSION}" ]; then
+                if tmux ls >/dev/null 2>/dev/null ; then
+                    tmux new-window "ssh ${i}"
+                else
+                    tmux new-session -d "ssh ${i}"
+                fi
             else
                 tmux new-session -d "ssh ${i}"
             fi
