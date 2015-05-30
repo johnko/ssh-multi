@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # ssh-multi
 # D.Kovalov
 # Based on http://linuxpixies.blogspot.jp/2011/06/tmux-copy-mode-and-how-to-control.html
@@ -8,31 +8,33 @@
 
 
 starttmux() {
-    if [ -z "$HOSTS" ]; then
-       echo -n "Please provide of list of hosts separated by spaces [ENTER]: "
-       read HOSTS
-    fi
-
-    local hosts=( $HOSTS )
-
-
-    if tmux ls >/dev/null ; then
-        tmux new-window "ssh ${hosts[0]}"
+    count=0
+    if [ -z "${1}" ]; then
+        echo -n "Please provide of list of hosts separated by spaces [ENTER]: "
+        read HOSTS
     else
-        tmux new-session -d "ssh ${hosts[0]}"
+        HOSTS=$*
     fi
-    unset hosts[0];
-    for i in "${hosts[@]}"; do
-        tmux split-window -h  "ssh $i"
-        tmux select-layout tiled > /dev/null
+
+    for i in ${HOSTS} ; do
+        count=$(( count + 1 ))
+        if [ ${count} -eq 1 ]; then
+            if tmux ls >/dev/null 2>/dev/null ; then
+                tmux new-window "ssh ${i}"
+            else
+                tmux new-session -d "ssh ${i}"
+            fi
+        else
+            tmux split-window -h  "ssh ${i}"
+            tmux select-layout tiled >/dev/null
+        fi
     done
+
     tmux select-pane -t 0
-    tmux set-window-option synchronize-panes on > /dev/null
+    tmux set-window-option synchronize-panes on >/dev/null
 
 }
 
-HOSTS=${HOSTS:=$*}
-
-starttmux
+starttmux $*
 
 tmux attach
