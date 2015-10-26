@@ -7,7 +7,7 @@
 # a script to ssh multiple servers over multiple tmux panes
 
 # set to 1 to reuse an existing tmux session
-#NEWWINDOW=1
+#NONEWWINDOW=1
 
 starttmux() {
     count=0
@@ -21,7 +21,7 @@ starttmux() {
     for i in ${HOSTS} ; do
         count=$(( count + 1 ))
         if [ ${count} -eq 1 ]; then
-            if [ "x" = "x${NEWWINDOW}" ] && tmux ls >/dev/null 2>/dev/null ; then
+            if [ "x" = "x${NONEWWINDOW}" ] && tmux ls >/dev/null 2>/dev/null ; then
                 tmux new-window "ssh ${i}"
             else
                 tmux new-session -d "ssh ${i}"
