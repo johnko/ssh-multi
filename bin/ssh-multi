@@ -27,6 +27,8 @@ starttmux() {
 		exit 1
 	fi
 
+	exec &>/dev/null # mute stdout and stderr
+
 	if tmux has-session -t "$SSHMULTISESSION"; then
 		tmux new-window -t "$SSHMULTISESSION" "ssh $1"
 	else
