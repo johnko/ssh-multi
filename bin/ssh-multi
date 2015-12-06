@@ -1,42 +1,49 @@
 #!/bin/sh
 # ssh-multi
-# D.Kovalov
+# D.Kovalov, P.Brantsch
 # Based on http://linuxpixies.blogspot.jp/2011/06/tmux-copy-mode-and-how-to-control.html
 # Modified by johnko https://gist.github.com/johnko/a8481db6a83ec5ea2f37
 
 # a script to ssh multiple servers over multiple tmux panes
 
-# set to 1 to reuse an existing tmux session
-#NONEWWINDOW=1
+printusage() {
+	cat <<- EOF
+	USAGE:
+	    $0 host [host]...
+
+	For each given host, this script creates an ssh session in a tmux pane.
+	The panes will be synchronized, so that they all receive the same keystrokes.
+
+	To reuse an existing tmux session, set the SSHMULTISESSION variable to the
+	name of that session.
+	EOF
+}
 
 starttmux() {
-    count=0
-    if [ -z "${1}" ]; then
-        echo -n "Please provide of list of hosts separated by spaces [ENTER]: "
-        read HOSTS
-    else
-        HOSTS=$*
-    fi
+	typeset -r SSHMULTISESSION=${SSHMULTISESSION:="ssh-multi-$$"}
+	count=0
+	if [ $# -eq 0 ]; then
+		printusage
+		exit 1
+	fi
 
-    for i in ${HOSTS} ; do
-        count=$(( count + 1 ))
-        if [ ${count} -eq 1 ]; then
-            if [ "x" = "x${NONEWWINDOW}" ] && tmux ls >/dev/null 2>/dev/null ; then
-                tmux new-window "ssh ${i}"
-            else
-                tmux new-session -d "ssh ${i}"
-            fi
-        else
-            tmux split-window -h  "ssh ${i}"
-            tmux select-layout tiled >/dev/null
-        fi
-    done
+	exec &>/dev/null # mute stdout and stderr
 
-    tmux select-pane -t 0
-    tmux set-window-option synchronize-panes on >/dev/null
+	if tmux has-session -t "$SSHMULTISESSION"; then
+		tmux new-window -t "$SSHMULTISESSION" "ssh $1"
+	else
+		tmux new-session -s "$SSHMULTISESSION" -d "ssh $1"
+	fi
+	shift
+	for i in $* ; do
+			tmux split-window -t "$SSHMULTISESSION" -h  "ssh $i"
+			tmux select-layout -t "$SSHMULTISESSION" tiled
+	done
 
+	tmux select-pane -t "$SSHMULTISESSION:0"
+	tmux set-window-option -t "$SSHMULTISESSION" synchronize-panes on
 }
 
 starttmux $*
 
-tmux attach
+tmux attach-session -t "$SSHMULTISESSION"
