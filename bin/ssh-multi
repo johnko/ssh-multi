@@ -7,7 +7,7 @@
 # a script to ssh multiple servers over multiple tmux panes
 
 printusage() {
-	cat <<- EOF
+	cat <<EOF
 	USAGE:
 	    $0 host [host]...
 
@@ -16,12 +16,11 @@ printusage() {
 
 	To reuse an existing tmux session, set the SSHMULTISESSION variable to the
 	name of that session.
-	EOF
+EOF
 }
 
 starttmux() {
-	typeset -r SSHMULTISESSION=${SSHMULTISESSION:="ssh-multi-$$"}
-	count=0
+	SSHMULTISESSION=${SSHMULTISESSION:="ssh-multi-$$"}
 	if [ $# -eq 0 ]; then
 		printusage
 		exit 1
